@@ -175,7 +175,7 @@ if __name__ == '__main__':
         
         vocab = None
         image = (plt.imshow(draw_scene_graph(objs, triples, encodedAttr, vocab, orientation='V')))
-        savePath = './data/' + imageId + '.png'
+        savePath = './data/vis/' + imageId + '.png'
         print(imageId)
         plt.savefig(savePath)
         plt.clf()
