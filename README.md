@@ -10,9 +10,11 @@ The training code is implemented based on Yang Xu's implementation of SGAE in ht
 Follow the instructions to set up the environment/data from Yang Xu's README.
 
 # Additioanl Dependency
-ISG is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
+Pseudolabel is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
 HOI is generated through VSGNet https://github.com/ASMIftekhar/VSGNet
 ```
+python pseudo_filter.py -i [SGDet pickle] -o [output path]
+python hoi_partial_graph.py -i [VSG output] -o [output filename] -p [output path]
 ```
 We will provide the processed VisualGenome Data. 
 
