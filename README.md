@@ -9,7 +9,7 @@ The training code is implemented based on Yang Xu's implementation of SGAE in ht
 # Installation anaconda and the environment
 Follow the instructions to set up the environment/data from Yang Xu's README.
 
-# Additioanl Dependency
+# Additional Dependency
 Pseudolabel is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
 HOI is generated through VSGNet https://github.com/ASMIftekhar/VSGNet
 ```
