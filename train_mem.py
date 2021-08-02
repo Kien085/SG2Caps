@@ -42,6 +42,8 @@ def train(opt):
     change_mode2 = 0
 
     use_rela = getattr(opt,'use_rela',0)
+    use_bbox = getattr(opt, 'use_bbox', 1)
+    use_globals = getattr(opt, 'use_globals', 1)
     if use_rela:
         opt.rela_dict_size = loader.rela_dict_size
     #need another parameter to control how to train the model
@@ -201,13 +203,28 @@ def train(opt):
         rela_data['attr_matrix'] = rela_attr_matrix
         rela_data['attr_masks'] = rela_attr_masks
 
-        tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
-              data['ssg_attr'], data['ssg_attr_masks'],data['ssg_bbox'],data['reg_v_feats']]
         #tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+        #      data['ssg_attr'], data['ssg_attr_masks'],data['ssg_bbox'],data['reg_v_feats']]
+        if use_bbox and use_globals:
+            tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox'],data['global_v_feats']]
+        elif use_bbox:
+            tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                    data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox']] 
+        else:
+            tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                data['ssg_attr'], data['ssg_attr_masks']]
+        # tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
         #       data['ssg_attr'], data['ssg_attr_masks'],data['ssg_bbox'],data['global_v_feats']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-        ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
-        #ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
+        #ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
+        if use_bbox and use_globals:
+            ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
+        elif use_bbox:
+            ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox = tmp
+        else:
+            ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks  = tmp
+        ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
         ssg_data = {}
         ssg_data['ssg_rela_matrix'] = ssg_rela_matrix
         ssg_data['ssg_rela_masks'] = ssg_rela_masks
@@ -215,9 +232,11 @@ def train(opt):
         ssg_data['ssg_obj_masks'] = ssg_obj_masks
         ssg_data['ssg_attr'] = ssg_attr
         ssg_data['ssg_attr_masks'] = ssg_attr_masks
-        ssg_data['ssg_bbox'] = ssg_bbox
-        #ssg_data['global_v_feats'] = global_v_feats
-        ssg_data['reg_v_feats'] = reg_v_feats
+        if use_bbox:
+            ssg_data['ssg_bbox'] = ssg_bbox
+        if use_globals:
+            ssg_data['global_v_feats'] = global_v_feats
+        #ssg_data['reg_v_feats'] = reg_v_feats
 
         if not sc_flag:
             loss = crit(dp_model(fc_feats, att_feats, labels, att_masks, rela_data, ssg_data, use_rela, training_mode),

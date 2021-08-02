@@ -82,11 +82,19 @@ def parse_opt():
     parser.add_argument('--use_bn', type=int, default=0,
                     help='If 1, then do batch_normalization first in att_embed, if 2 then do bn both in the beginning and the end of att_embed')
 
+    parser.add_argument('--use_bbox', type=int, default=1,
+                        help='if 0, do not use bbox. If anything else, use bbox')
+
+
     # feature manipulation
     parser.add_argument('--norm_att_feat', type=int, default=0,
                     help='If normalize attention features')
     parser.add_argument('--use_box', type=int, default=0,
                     help='If use box features')
+    parser.add_argument('--use_bbox', type=int, default=1,
+                        help='if 0, do not use bbox. If anything else, use bbox')
+    parser.add_argument('--use_globals', type=int, default=1,
+                        help='if 0, do not use global features. If anything else, use global features')
     parser.add_argument('--use_obj', type=int, default=0,
                         help='If learn object information when training scene graph classification')
     parser.add_argument('--use_attr', type=int, default=0,

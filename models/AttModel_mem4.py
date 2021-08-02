@@ -61,6 +61,7 @@ class AttModel_mem4(CaptionModel):
         self.att_hid_size = opt.att_hid_size
         self.seq_per_img = opt.seq_per_img
         self.use_rela = getattr(opt, 'use_rela', 0)
+        
 
         self.ssg_core = TopDownCore_mem(opt)
         self.rela_core = TopDownCore_rela(opt)
@@ -159,8 +160,10 @@ class AttModel_mem4(CaptionModel):
         #self.rela_mem = Memory_cell2(opt)
         self.ssg_mem = Memory_cell2(opt)
 
-        self.res_vis_feature = 1 #opt.res_vis_feature
-        #self.global_vis_feature = opt.global_vis_feature
+        self.use_bbox = getattr(opt, 'use_bbox', 1)
+        self.use_globals = getattr(opt, 'use_globals', 1)
+        self.global_vis_feature = self.use_globals
+        #self.global_vis_feature = opt.global_vis_features
 
 
 
@@ -401,9 +404,10 @@ class AttModel_mem4(CaptionModel):
         ssg_rela_matrix = ssg_data['ssg_rela_matrix']
         ssg_rela_masks = ssg_data['ssg_rela_masks']
         ### Subarna: add bbox features with the attributes  
-        ssg_bbox = ssg_data['ssg_bbox'] ### box_feat = (x1, y1, x2, y2, (x2-x1)*(y2-y1))
-
-        reg_v_feats = ssg_data['reg_v_feats'] #if self.reg_vis_feature:
+        if self.use_bbox:
+            ssg_bbox = ssg_data['ssg_bbox'] ### box_feat = (x1, y1, x2, y2, (x2-x1)*(y2-y1))
+        if self.global_vis_feature:
+            global_v_feats = ssg_data['global_v_feats'] #
 
         ssg_obj_feats = torch.zeros([ssg_obj.size()[0], ssg_obj.size()[1], self.rnn_size]).cuda()
         ssg_rela_feats = torch.zeros([ssg_rela_matrix.size()[0], ssg_rela_matrix.size()[1], self.rnn_size]).cuda()
@@ -411,8 +415,8 @@ class AttModel_mem4(CaptionModel):
         ssg_attr_masks_new = torch.zeros(ssg_obj.size()).cuda()
 
 
-        use_bbox_feature = True
-        new_bbox_encoding = True
+        use_bbox_feature = self.use_bbox
+        new_bbox_encoding = self.use_bbox
 
         ## new bbox encoding
         if new_bbox_encoding: 
@@ -428,7 +432,8 @@ class AttModel_mem4(CaptionModel):
             seq_per_img = self.seq_per_img
         N_img = int(N_att/seq_per_img)
 
-        ssg_reg_v_proj_feats = torch.zeros([reg_v_feats.size()[0], reg_v_feats.size()[1], self.rnn_size]).cuda()
+        if self.global_vis_feature:
+            global_v_proj_feats = torch.zeros([N_img, 1, self.rnn_size]).cuda()
 
 
         for img_id in range(N_img):
@@ -439,7 +444,8 @@ class AttModel_mem4(CaptionModel):
             obj_feats_temp = self.ssg_obj_obj_fc(obj_feats_ori)
             obj_num = np.ones([N_obj,])
 
-            reg_v_proj_feats = self.img_v_feat_proj_fc(reg_v_feats[img_id, :N_obj, :].cuda().float())
+            if self.global_vis_feature:
+                global_v_proj_feats[img_id,0,:] = self.img_v_feat_proj_fc(global_v_feats[img_id, 0, :].cuda().float())
             
             ## Subarna: add bbox featires with the attributes
             #obj_bbox = ssg_bbox[img_id*seq_per_img, :N_obj].cuda().float() 
@@ -505,9 +511,7 @@ class AttModel_mem4(CaptionModel):
             ### new bbox encoding    
             if new_bbox_encoding:
                 # ssg_bbox_masks_new[img_id*seq_per_img:(img_id+1)*seq_per_img, :N_obj_attr] = 1
-                ssg_bbox_feats[img_id * seq_per_img: (img_id+1) * seq_per_img, :N_obj, :] = obj_bbox_feats  
-
-            ssg_reg_v_proj_feats[img_id, :N_obj, :] = reg_v_proj_feats     
+                ssg_bbox_feats[img_id * seq_per_img: (img_id+1) * seq_per_img, :N_obj, :] = obj_bbox_feats   
 
 
         ssg_data_new['ssg_obj_feats'] = ssg_obj_feats
@@ -519,7 +523,8 @@ class AttModel_mem4(CaptionModel):
             ssg_data_new['ssg_bbox_feats'] = ssg_bbox_feats
             # ssg_data_new['ssg_bbox_masks'] = ssg_bbox_masks_new
 
-        ssg_data_new['reg_v_proj_feats'] = ssg_reg_v_proj_feats    
+        if self.global_vis_feature:
+            ssg_data_new['global_v_proj_feats'] = global_v_proj_feats    
 
         return ssg_data_new
 
@@ -539,10 +544,13 @@ class AttModel_mem4(CaptionModel):
         ssg_obj_masks = ssg_data_new['ssg_obj_masks']
         ssg_attr_masks = ssg_data_new['ssg_attr_masks']
 
-        reg_v_proj_feats = ssg_data_new['reg_v_proj_feats']
+        #ssg_obj_v_feats = ssg_data_new['ssg_obj_v_feats']
+
+        if self.global_vis_feature:
+            global_v_proj_feats = ssg_data_new['global_v_proj_feats']
 
         # new bbox encoding
-        new_bbox_encoding = True
+        new_bbox_encoding = self.use_bbox
 
         ## new bbox encoding
         if new_bbox_encoding:
@@ -563,6 +571,11 @@ class AttModel_mem4(CaptionModel):
             #N_attr = int(torch.sum(ssg_attr_masks[img_id*seq_per_img,:])) 
             N_att_max = max(N_att_max, N_obj) 
 
+
+        if self.global_vis_feature:  ### one additional entry per image
+            N_att_max = 1  
+ 
+
         att_feats = torch.zeros([N_att, N_att_max, self.rnn_size]).cuda()
         att_masks = torch.zeros([N_att, N_att_max]).cuda()
 
@@ -574,14 +587,46 @@ class AttModel_mem4(CaptionModel):
                 N_bbox = N_obj
 
             if N_obj != 0:	
-                att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
-                    reg_v_proj_feats[img_id, :N_obj, :] + \
+                if self.use_bbox and self.global_vis_feature:
+                    att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
+                        global_v_proj_feats[img_id, :N_obj, :] + \
+                            ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] + \
+                                ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
+                                    ssg_attr_feats[img_id * seq_per_img, :N_obj, :]
+                elif self.use_bbox:
+                    att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
                         ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] + \
                             ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
-                                ssg_attr_feats[img_id * seq_per_img, :N_obj, :]
-                                
+                                ssg_attr_feats[img_id * seq_per_img, :N_obj, :]  
+                else:
+                    att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
+                        ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
+                            ssg_attr_feats[img_id * seq_per_img, :N_obj, :]              
                 att_masks[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_att_max] = 1 
-      
+
+            # if self.global_vis_feature:
+            #     att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
+            #             ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
+            #                 ssg_attr_feats[img_id * seq_per_img, :N_obj, :] + \
+            #                     ssg_bbox_feats[img_id * seq_per_img, :N_obj, :]
+            #     for g_id in range(seq_per_img):
+            #         new_idx = img_id*seq_per_img + g_id 
+            #         att_feats[new_idx, 0, :] = \
+            #             global_v_proj_feats[img_id, 0, :]
+                                    
+            #     att_masks[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_att_max] = 1 
+            # else: 
+            #     if self.use_bbox:
+            #         if N_obj != 0:
+            #             att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
+            #                 ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
+            #                     ssg_attr_feats[img_id * seq_per_img, :N_obj, :] + \
+            #                         ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] 
+            #             att_masks[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj] = 1 
+            #     else:
+            #         if N_obj != 0:
+            #             # i dont really know
+            #             att_masks[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj] = 1           
 
         ssg_data_new['att_feats_new'] = att_feats
         ssg_data_new['att_masks_new'] = att_masks

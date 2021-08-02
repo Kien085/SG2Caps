@@ -65,6 +65,8 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
     dataset = eval_kwargs.get('dataset', 'coco')
     beam_size = eval_kwargs.get('beam_size', 1)
     use_rela = eval_kwargs.get('use_rela', 0)
+    use_bbox = eval_kwargs.get('use_bbox', 1)
+    use_global = eval_kwargs.get('use_global', 1)
     index_eval = eval_kwargs.get('index_eval', 1)
 
     # Make sure in the evaluation mode
@@ -106,13 +108,26 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
             rela_data['rela_masks'] = rela_rela_masks
             rela_data['attr_matrix'] = rela_attr_matrix
             rela_data['attr_masks'] = rela_attr_masks
-
-            # tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
-            #        data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox'],data['global_v_feats']]
-            tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
-                   data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox'],data['reg_v_feats']]
+            
+            if use_bbox and use_global:
+                tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                    data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox'],data['global_v_feats']]
+            elif use_bbox:
+                tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                    data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox']] 
+            else:
+                tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+                    data['ssg_attr'], data['ssg_attr_masks']]
+            #tmp = [data['ssg_rela_matrix'], data['ssg_rela_masks'], data['ssg_obj'], data['ssg_obj_masks'],
+            #       data['ssg_attr'], data['ssg_attr_masks'], data['ssg_bbox'],data['reg_v_feats']]
             tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-            ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
+            #ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
+            if use_bbox and use_global:
+                ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
+            elif use_bbox:
+                ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox = tmp
+            else:
+                ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks = tmp
             #ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
             ssg_data = {}
             ssg_data['ssg_rela_matrix'] = ssg_rela_matrix
@@ -121,10 +136,12 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
             ssg_data['ssg_obj_masks'] = ssg_obj_masks
             ssg_data['ssg_attr'] = ssg_attr
             ssg_data['ssg_attr_masks'] = ssg_attr_masks
-            ssg_data['ssg_bbox'] = ssg_bbox
+            if use_bbox:
+                ssg_data['ssg_bbox'] = ssg_bbox
             #change
-            ssg_data['reg_v_feats'] = reg_v_feats
-            #ssg_data['global_v_feats'] = global_v_feats
+            #ssg_data['reg_v_feats'] = reg_v_feats
+            if use_global:
+                ssg_data['global_v_feats'] = global_v_feats
             loss = 0
             with torch.no_grad():
                 loss = crit(model(fc_feats, att_feats, labels, att_masks,
@@ -159,25 +176,56 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
             fc_feats, att_feats, att_masks, rela_rela_matrix, rela_rela_masks, rela_attr_matrix, rela_attr_masks, \
             ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks = tmp
         else:
-            tmp = [data['fc_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['att_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['att_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_rela_matrix'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_rela_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_obj'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_obj_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_attr'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_attr_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   data['ssg_bbox'][np.arange(loader.batch_size) * loader.seq_per_img],
-                   #change
-                   data['reg_v_feats'][np.arange(loader.batch_size) * loader.seq_per_img]
-                   #data['global_v_feats'][np.arange(loader.batch_size)]
-                   ]
+            if use_bbox and use_global:
+                tmp = [data['fc_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_matrix'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_bbox'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    #change
+                    #data['reg_v_feats'][np.arange(loader.batch_size) * loader.seq_per_img]
+                    data['global_v_feats'][np.arange(loader.batch_size)]
+                    ]
+            elif use_bbox:
+                tmp = [data['fc_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_matrix'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_bbox'][np.arange(loader.batch_size) * loader.seq_per_img]
+                    ]
+            else:
+                tmp = [data['fc_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_feats'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['att_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_matrix'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_rela_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_obj_masks'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr'][np.arange(loader.batch_size) * loader.seq_per_img],
+                    data['ssg_attr_masks'][np.arange(loader.batch_size) * loader.seq_per_img]
+                    ]
             tmp = [torch.from_numpy(_).cuda() for _ in tmp]
+            if use_bbox and use_global:
+                fc_feats, att_feats, att_masks, ssg_rela_matrix, ssg_rela_masks, \
+                ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
+            elif use_bbox:
+                fc_feats, att_feats, att_masks, ssg_rela_matrix, ssg_rela_masks, \
+                ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox = tmp
+            else:
+                fc_feats, att_feats, att_masks, ssg_rela_matrix, ssg_rela_masks, \
+                ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks = tmp
             #fc_feats, att_feats, att_masks, ssg_rela_matrix, ssg_rela_masks, \
-            #ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
-            fc_feats, att_feats, att_masks, ssg_rela_matrix, ssg_rela_masks, \
-            ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
+            #ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, reg_v_feats = tmp
             rela_rela_matrix = None
             rela_rela_masks = None
             rela_attr_matrix = None
@@ -197,10 +245,11 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
         ssg_data['ssg_obj_masks'] = ssg_obj_masks
         ssg_data['ssg_attr'] = ssg_attr
         ssg_data['ssg_attr_masks'] = ssg_attr_masks
-        ssg_data['ssg_bbox'] = ssg_bbox
-        #change reg_v_feats
-        #ssg_data['global_v_feats'] = global_v_feats
-        ssg_data['reg_v_feats'] = reg_v_feats
+        if use_bbox:
+            ssg_data['ssg_bbox'] = ssg_bbox
+        if use_global:
+            ssg_data['global_v_feats'] = global_v_feats
+        #ssg_data['reg_v_feats'] = reg_v_feats
 
         # forward the model to also get generated samples for each image
         with torch.no_grad():

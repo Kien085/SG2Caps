@@ -41,6 +41,8 @@ class DataLoader(data.Dataset):
         # feature related options
         self.use_att = getattr(opt, 'use_att', True)
         self.use_box = getattr(opt, 'use_box', 0)
+        self.use_bbox = getattr(opt, 'use_bbox', 1)
+        self.use_globals = getattr(opt, 'use_globals', 1)
         # whether use relationship info or not
         self.use_rela = getattr(opt, 'use_rela', 0)
         self.use_ssg = getattr(opt, 'use_ssg', 0)
@@ -187,13 +189,13 @@ class DataLoader(data.Dataset):
             ssg_attr_batch.append(tmp_ssg['ssg_attr'])
             ssg_obj_batch.append(tmp_ssg['ssg_obj'])
 
-            ssg_bbox_batch.append(tmp_ssg['ssg_bbox'])
+            if self.use_bbox:
+                ssg_bbox_batch.append(tmp_ssg['ssg_bbox'])
 
             #change
-            
-            ssg_global_v_feats_batch.append(tmp_ssg['reg_v_feats'])
-
-            #ssg_global_v_feats_batch.append(tmp_ssg['global_v_feats'])
+            if self.use_globals:
+                #ssg_global_v_feats_batch.append(tmp_ssg['reg_v_feats'])
+                ssg_global_v_feats_batch.append(tmp_ssg['global_v_feats'])
 
 
 
@@ -298,24 +300,25 @@ class DataLoader(data.Dataset):
         data['bounds'] = {'it_pos_now': self.iterators[split], 'it_max': len(self.split_ix[split]), 'wrapped': wrapped}
         data['infos'] = infos
 
+        if self.use_bbox:
+            max_bbox_len = max([_.shape[1] for _ in ssg_bbox_batch])
+            data['ssg_bbox'] = np.ones([len(att_batch) * seq_per_img, max_obj_len, max_bbox_len])*-1
+            for i in range(len(ssg_obj_batch)):
+                data['ssg_bbox'][i * seq_per_img:(i+1)*seq_per_img,0:len(ssg_obj_batch[i]),0:ssg_bbox_batch[i].shape[1]] = \
+                    ssg_bbox_batch[i]
 
-        max_bbox_len = max([_.shape[1] for _ in ssg_bbox_batch])
-        data['ssg_bbox'] = np.ones([len(att_batch) * seq_per_img, max_obj_len, max_bbox_len])*-1
-        for i in range(len(ssg_obj_batch)):
-            data['ssg_bbox'][i * seq_per_img:(i+1)*seq_per_img,0:len(ssg_obj_batch[i]),0:ssg_bbox_batch[i].shape[1]] = \
-                ssg_bbox_batch[i]
-
-        ###### change reg_v_feats  
-        global_v_feats_len = max([_.shape[1] for _ in ssg_global_v_feats_batch])
-        data['reg_v_feats'] = np.ones([len(att_batch) * seq_per_img, max_obj_len, global_v_feats_len])*-1
-        for i in range(len(ssg_obj_batch)):
-            data['reg_v_feats'][i * seq_per_img:(i+1)*seq_per_img,0:len(ssg_obj_batch[i]),0:ssg_global_v_feats_batch[i].shape[1]] = \
-                ssg_global_v_feats_batch[i]    
-        # global_v_feats_len = max([_.shape[0] for _ in ssg_global_v_feats_batch]) ### 2048
-        # data['global_v_feats'] = np.ones([len(att_batch), 1, global_v_feats_len])*-1
-        # for i in range(len(ssg_obj_batch)):
-        #     data['global_v_feats'][i,0,0:global_v_feats_len] = \
-        #         ssg_global_v_feats_batch[i]
+        ###### change reg_v_feats 
+        if self.use_globals: 
+            # global_v_feats_len = max([_.shape[1] for _ in ssg_global_v_feats_batch])
+            # data['reg_v_feats'] = np.ones([len(att_batch) * seq_per_img, max_obj_len, global_v_feats_len])*-1
+            # for i in range(len(ssg_obj_batch)):
+            #     data['reg_v_feats'][i * seq_per_img:(i+1)*seq_per_img,0:len(ssg_obj_batch[i]),0:ssg_global_v_feats_batch[i].shape[1]] = \
+            #         ssg_global_v_feats_batch[i]    
+            global_v_feats_len = max([_.shape[0] for _ in ssg_global_v_feats_batch]) ### 2048
+            data['global_v_feats'] = np.ones([len(att_batch), 1, global_v_feats_len])*-1
+            for i in range(len(ssg_obj_batch)):
+                data['global_v_feats'][i,0,0:global_v_feats_len] = \
+                    ssg_global_v_feats_batch[i]
         
 
 
@@ -397,20 +400,21 @@ class DataLoader(data.Dataset):
                 ssg_data['ssg_obj'] = ssg_obj
 
                 #kien
-                ssg_obj_bbox_info = ssg_info[()]['bbox_info']
-                h,w = self.info['images'][ix]['H'], self.info['images'][ix]['W']
-                ssg_bbox = []
-                for bbox in ssg_obj_bbox_info:
-                    meBBoxs = np.asarray(bbox)
-                    #x1,y1,x2,y2 = np.hsplit(meBBoxs, 4)
-                    x1 = meBBoxs[0]
-                    y1 = meBBoxs[1]
-                    x2 = meBBoxs[2]
-                    y2 = meBBoxs[3]
-                    temp = [x1/w, y1/h, x2/w, y2/h, (x2-x1)*(y2-y1)/(w*h)]
-                    ssg_bbox.append(temp)
-                
-                ssg_data['ssg_bbox'] = np.asarray(ssg_bbox)
+                if self.use_bbox:
+                    ssg_obj_bbox_info = ssg_info[()]['bbox_info']
+                    h,w = self.info['images'][ix]['H'], self.info['images'][ix]['W']
+                    ssg_bbox = []
+                    for bbox in ssg_obj_bbox_info:
+                        meBBoxs = np.asarray(bbox)
+                        #x1,y1,x2,y2 = np.hsplit(meBBoxs, 4)
+                        x1 = meBBoxs[0]
+                        y1 = meBBoxs[1]
+                        x2 = meBBoxs[2]
+                        y2 = meBBoxs[3]
+                        temp = [x1/w, y1/h, x2/w, y2/h, (x2-x1)*(y2-y1)/(w*h)]
+                        ssg_bbox.append(temp)
+                    
+                    ssg_data['ssg_bbox'] = np.asarray(ssg_bbox)
                 
             else:
                 ssg_data = {}
@@ -426,12 +430,13 @@ class DataLoader(data.Dataset):
             #     ssg_data['global_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
             # else:
             #     ssg_data['global_v_feats'] = np.zeros([0,])
-            path_temp_vis = os.path.join("../../../mnt/fire/kien/box_max", str(self.info['images'][ix]['id']) + '.npy')
-            if os.path.isfile(path_temp_vis):
-                vis_info = np.load(os.path.join(path_temp_vis))
-                ssg_data['reg_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
-            else:
-                ssg_data['reg_v_feats'] = np.zeros([0,])
+            if self.use_globals:
+                path_temp_vis = os.path.join("../../../mnt/fire/kien/box_max", str(self.info['images'][ix]['id']) + '.npy')
+                if os.path.isfile(path_temp_vis):
+                    vis_info = np.load(os.path.join(path_temp_vis))
+                    ssg_data['reg_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
+                else:
+                    ssg_data['reg_v_feats'] = np.zeros([0,])
 
 
         else:
