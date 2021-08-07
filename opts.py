@@ -82,9 +82,6 @@ def parse_opt():
     parser.add_argument('--use_bn', type=int, default=0,
                     help='If 1, then do batch_normalization first in att_embed, if 2 then do bn both in the beginning and the end of att_embed')
 
-    parser.add_argument('--use_bbox', type=int, default=1,
-                        help='if 0, do not use bbox. If anything else, use bbox')
-
 
     # feature manipulation
     parser.add_argument('--norm_att_feat', type=int, default=0,

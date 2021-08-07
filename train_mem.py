@@ -224,7 +224,7 @@ def train(opt):
             ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox = tmp
         else:
             ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks  = tmp
-        ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
+        #ssg_rela_matrix, ssg_rela_masks, ssg_obj, ssg_obj_masks, ssg_attr, ssg_attr_masks, ssg_bbox, global_v_feats = tmp
         ssg_data = {}
         ssg_data['ssg_rela_matrix'] = ssg_rela_matrix
         ssg_data['ssg_rela_masks'] = ssg_rela_masks
