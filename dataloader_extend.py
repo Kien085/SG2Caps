@@ -56,8 +56,8 @@ class DataLoader(data.Dataset):
         self.info = json.load(open(self.opt.input_json))
 
         print('using new dict')
-        if self.opt.sg_dict_path == '../../../mnt/fire/kien/spice_sg_dict2.npz':
-            sg_dict_info = np.load(self.opt.sg_dict_path)['spice_dict'][()]
+        if self.opt.sg_dict_path == 'data/spice_sg_dict2.npz':
+            sg_dict_info = np.load(self.opt.sg_dict_path,allow_pickle=True)['spice_dict'][()]
             self.ix_to_word = sg_dict_info['ix_to_word']
         else:
             sg_dict_info = np.load(self.opt.sg_dict_path)['sg_dict'][()]
@@ -423,20 +423,20 @@ class DataLoader(data.Dataset):
                 ssg_data['ssg_obj'] = np.zeros([0,])
 
             ###### change
-            ## read global visual feature for image_id => ix: 2048-d vector
-            # path_temp_vis = os.path.join("../../../mnt/fire/kien/max_pool", str(self.info['images'][ix]['id']) + '.npy')
-            # if os.path.isfile(path_temp_vis):
-            #     vis_info = np.load(os.path.join(path_temp_vis))
-            #     ssg_data['global_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
-            # else:
-            #     ssg_data['global_v_feats'] = np.zeros([0,])
-            if self.use_globals:
-                path_temp_vis = os.path.join("../../../mnt/fire/kien/box_max", str(self.info['images'][ix]['id']) + '.npy')
-                if os.path.isfile(path_temp_vis):
-                    vis_info = np.load(os.path.join(path_temp_vis))
-                    ssg_data['reg_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
-                else:
-                    ssg_data['reg_v_feats'] = np.zeros([0,])
+            # read global visual feature for image_id => ix: 2048-d vector
+            path_temp_vis = os.path.join("data/max_pool", str(self.info['images'][ix]['id']) + '.npy')
+            if os.path.isfile(path_temp_vis):
+                vis_info = np.load(os.path.join(path_temp_vis))
+                ssg_data['global_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
+            else:
+                ssg_data['global_v_feats'] = np.zeros([0,])
+            # if self.use_globals:
+            #     path_temp_vis = os.path.join("data/box_max", str(self.info['images'][ix]['id']) + '.npy')
+            #     if os.path.isfile(path_temp_vis):
+            #         vis_info = np.load(os.path.join(path_temp_vis))
+            #         ssg_data['reg_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
+            #     else:
+            #         ssg_data['reg_v_feats'] = np.zeros([0,])
 
 
         else:

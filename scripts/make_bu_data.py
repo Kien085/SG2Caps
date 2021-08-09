@@ -24,13 +24,13 @@ csv.field_size_limit(sys.maxsize)
 
 
 FIELDNAMES = ['image_id', 'image_w','image_h','num_boxes', 'boxes', 'features']
-# infiles = ['trainval/karpathy_test_resnet101_faster_rcnn_genome.tsv',
-#           'trainval/karpathy_val_resnet101_faster_rcnn_genome.tsv',\
-#           'trainval/karpathy_train_resnet101_faster_rcnn_genome.tsv.0', \
-#            'trainval/karpathy_train_resnet101_faster_rcnn_genome.tsv.1']
+infiles = ['trainval/karpathy_test_resnet101_faster_rcnn_genome.tsv',
+          'trainval/karpathy_val_resnet101_faster_rcnn_genome.tsv',\
+          'trainval/karpathy_train_resnet101_faster_rcnn_genome.tsv.0', \
+           'trainval/karpathy_train_resnet101_faster_rcnn_genome.tsv.1']
 
 #for 36 version
-infiles = ['trainval_36/trainval_resnet101_faster_rcnn_genome_36.tsv']
+#infiles = ['trainval_36/trainval_resnet101_faster_rcnn_genome_36.tsv']
 
 os.makedirs(args.output_dir+'_att')
 os.makedirs(args.output_dir+'_fc')
@@ -56,8 +56,8 @@ for infile in infiles:
             cocobu_size_temp['image_w'] = item['image_w']
             cocobu_size_temp['image_h'] = item['image_h']
             cocobu_size[str(item['image_id'])] = cocobu_size_temp
-save_path = '/home/yangxu/project/self-critical.pytorch/data/cocobu_size.npz'
-np.savez(save_path, roidb=cocobu_size)
+#save_path = '/home/yangxu/project/self-critical.pytorch/data/cocobu_size.npz'
+#np.savez(save_path, roidb=cocobu_size)
 
 
 

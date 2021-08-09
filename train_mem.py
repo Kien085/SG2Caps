@@ -399,6 +399,6 @@ def train(opt):
         if epoch >= opt.max_epochs and opt.max_epochs != -1:
             break
 
-os.environ["CUDA_VISIBLE_DEVICES"]="4,5"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 opt = opts.parse_opt()
 train(opt)
