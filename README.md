@@ -34,7 +34,7 @@ wget https://storage.googleapis.com/up-down-attention/trainval.zip
 unzip trainval.zip
 
 #After unzipping
-
+cd ../..
 python scripts/make_bu_data.py --output_dir data/cocobu
 ```
 
