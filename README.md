@@ -39,7 +39,7 @@ python scripts/make_bu_data.py --output_dir data/cocobu
 ```
 
 
-Google Drive link: (INSERT GOOGLE DRIVE LINK HERE)
+Google Drive link: https://drive.google.com/file/d/1K6h8aupnQJ2v3IZdPNvqZTeGbH3qQ954/view?usp=sharing
 
 Download cocobu2_label.h5, cocobu2_append.json, and spice_sg_dict2.npz. 
 
