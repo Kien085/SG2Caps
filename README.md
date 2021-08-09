@@ -40,8 +40,11 @@ python scripts/make_bu_data.py --output_dir data/cocobu
 
 
 Google Drive link: (INSERT GOOGLE DRIVE LINK HERE)
+
 Download cocobu2_label.h5, cocobu2_append.json, and spice_sg_dict2.npz. 
+
 The VSGs can be found in the all_ISG and the HOI_ISG folder.
+
 The global features can be found in the max_pool folder.
 
 # Training the model
