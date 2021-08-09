@@ -27,7 +27,16 @@ We will provide the processed VisualGenome Data.
 
 # Data
 Create a data folder to hold all of the data.
-Follow step 2 under "Downloading meta data" from the SGAE repository to create data/cocobu_fc, data/cocobu_att and data/cocobu_box. 
+Run the following to download the bottom up features needed for the SGAE dependency.
+```
+mkdir data/bu_data; cd data/bu_data
+wget https://storage.googleapis.com/up-down-attention/trainval.zip
+unzip trainval.zip
+
+#After unzipping
+
+python scripts/make_bu_data.py --output_dir data/cocobu
+```
 
 
 Google Drive link: (INSERT GOOGLE DRIVE LINK HERE)
