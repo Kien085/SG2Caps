@@ -66,7 +66,7 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
     beam_size = eval_kwargs.get('beam_size', 1)
     use_rela = eval_kwargs.get('use_rela', 0)
     use_bbox = eval_kwargs.get('use_bbox', 1)
-    use_global = eval_kwargs.get('use_global', 1)
+    use_global = eval_kwargs.get('use_globals', 1)
     index_eval = eval_kwargs.get('index_eval', 1)
 
     # Make sure in the evaluation mode

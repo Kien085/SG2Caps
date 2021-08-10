@@ -111,6 +111,11 @@ if __name__ == '__main__':
     parser.add_argument('--memory_cell_path', type=str, default='0',
                             help='memory_cell_path')
 
+    parser.add_argument('--use_bbox', type=int, default=1,
+                        help='if 0, do not use bbox. If anything else, use bbox')
+    parser.add_argument('--use_globals', type=int, default=1,
+                        help='if 0, do not use global features. If anything else, use global features')
+
     opt = parser.parse_args()
 
     # Load infos
