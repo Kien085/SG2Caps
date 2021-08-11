@@ -15,7 +15,6 @@ Activate the environment with the following:
 ```
 conda activate myenv
 ```
-Follow the setup in /coco-caption to set up SPICE
 
 # Additional Dependency
 Pseudolabel is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
@@ -47,6 +46,8 @@ Download cocobu2_label.h5, cocobu2_append.json, and spice_sg_dict2.npz.
 The VSGs can be found in the all_ISG and the HOI_ISG folder.
 
 The global features can be found in the box_max.zip after unzipping in the max_pool folder.
+
+Download stanford-corenlp-3.6.0-models.jar and stanford-corenlp-3.6.0.jar and add them to the folder /coco-caption/lib/
 
 # Training the model
 1. After setting up the environment, and downloading the additional data train with this code.
