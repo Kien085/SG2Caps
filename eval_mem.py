@@ -142,7 +142,8 @@ if __name__ == '__main__':
         if k != 'model':
             if k not in ignore:
                 if k in vars(opt):
-                    assert vars(opt)[k] == vars(infos['opt'])[k], k + ' option not consistent'
+                    #assert vars(opt)[k] == vars(infos['opt'])[k], k + ' option not consistent'
+                    pass
                 else:
                     vars(opt).update({k: vars(infos['opt'])[k]}) # copy over options from model
 
