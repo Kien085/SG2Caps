@@ -47,7 +47,7 @@ The VSGs can be found in the all_ISG and the HOI_ISG folder.
 
 The global features can be found in the box_max.zip after unzipping in the max_pool folder.
 
-Download stanford-corenlp-3.6.0-models.jar and stanford-corenlp-3.6.0.jar and add them to the folder /coco-caption/lib/
+Download stanford-corenlp-3.6.0-models.jar and stanford-corenlp-3.6.0.jar and add them to the folder /coco-caption/pycocoevalcap/spice/lib
 
 # Training the model
 1. After setting up the environment, and downloading the additional data train with this code.
