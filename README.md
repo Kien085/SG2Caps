@@ -15,6 +15,7 @@ Activate the environment with the following:
 ```
 conda activate myenv
 ```
+Follow the setup in /coco-caption to set up SPICE
 
 # Additional Dependency
 Pseudolabel is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
