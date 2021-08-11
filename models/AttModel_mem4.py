@@ -593,6 +593,12 @@ class AttModel_mem4(CaptionModel):
                             ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] + \
                                 ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
                                     ssg_attr_feats[img_id * seq_per_img, :N_obj, :]
+
+                    for g_id in range(seq_per_img):
+                        new_idx = img_id*seq_per_img + g_id 
+                        att_feats[new_idx, N_obj:N_obj+N_att_max, :] = \
+                            global_v_proj_feats[img_id, 0, :]
+
                 elif self.use_bbox:
                     att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
                         ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
