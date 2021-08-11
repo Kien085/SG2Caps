@@ -315,11 +315,11 @@ def eval_split(model, crit, loader, training_mode=0, eval_kwargs={}):
             for img_id in scores_each.keys():
                 print('image %s, %s' % (scores_each[img_id]['image_id'], scores_each[img_id]['caption']))
                 print('cider {0:2f}'.format(scores_each[img_id]['CIDEr']))
-                text_file = open('data/gen_cap/cap'+ eval_kwargs['model'][-10:-4] + '.txt', "aw")
-                text_file.write('image %s, %s' % (scores_each[img_id]['image_id'], scores_each[img_id]['caption']))
-                text_file.write('\n cider {0:2f}'.format(scores_each[img_id]['CIDEr']))
-                text_file.write('\n')
-                text_file.close()
+                # text_file = open('data/gen_cap/cap'+ eval_kwargs['model'][-10:-4] + '.txt', "aw")
+                # text_file.write('image %s, %s' % (scores_each[img_id]['image_id'], scores_each[img_id]['caption']))
+                # text_file.write('\n cider {0:2f}'.format(scores_each[img_id]['CIDEr']))
+                # text_file.write('\n')
+                # text_file.close()
 
     # Switch back to training mode
     model.train()
