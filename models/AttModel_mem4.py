@@ -589,10 +589,9 @@ class AttModel_mem4(CaptionModel):
             if N_obj != 0:	
                 if self.use_bbox and self.global_vis_feature:
                     att_feats[img_id * seq_per_img:(img_id + 1) * seq_per_img, :N_obj, :] = \
-                        global_v_proj_feats[img_id, :N_obj, :] + \
-                            ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] + \
-                                ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
-                                    ssg_attr_feats[img_id * seq_per_img, :N_obj, :]
+                        ssg_obj_feats[img_id * seq_per_img, :N_obj, :]  + \
+                            ssg_attr_feats[img_id * seq_per_img, :N_obj, :] + \
+                                ssg_bbox_feats[img_id * seq_per_img, :N_obj, :] 
 
                     for g_id in range(seq_per_img):
                         new_idx = img_id*seq_per_img + g_id 
