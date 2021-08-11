@@ -426,7 +426,7 @@ class DataLoader(data.Dataset):
             # read global visual feature for image_id => ix: 2048-d vector
             path_temp_vis = os.path.join("data/max_pool", str(self.info['images'][ix]['id']) + '.npy')
             if os.path.isfile(path_temp_vis):
-                vis_info = np.load(os.path.join(path_temp_vis))
+                vis_info = np.load(os.path.join(path_temp_vis),allow_pickle=True)
                 ssg_data['global_v_feats'] = np.asarray(vis_info[()]).astype(np.float64) 
             else:
                 ssg_data['global_v_feats'] = np.zeros([0,])
