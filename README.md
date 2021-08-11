@@ -81,7 +81,7 @@ python train_mem.py --id id08 --caption_model lstm_mem4 --input_json data/cocobu
 # Evaluating the model
 1.To evaluate your code, run the following:
 ```
-python eval_mem.py --dump_images 0 --num_images 5000 --model data/id09/modelid090019.pth --infos_path data/id06/infos_id090019.pkl --language_eval 1 --beam_size 1 --split test --index_eval 1 --use_rela 0 --training_mode 0 --memory_cell_path data/id09/memory_cellid090019.npz --sg_dict_path data/spice_sg_dict2.npz --input_ssg_dir data/all_ISG --use_globals 0
+python eval_mem.py --dump_images 0 --num_images 5000 --input_json data/cocobu2_appended.json --model data/id09/modelid090019.pth --infos_path data/id06/infos_id090019.pkl --language_eval 1 --beam_size 1 --split test --index_eval 1 --use_rela 0 --training_mode 0 --memory_cell_path data/id09/memory_cellid090019.npz --sg_dict_path data/spice_sg_dict2.npz --input_ssg_dir data/all_ISG --use_globals 0
 ```
 Make sure that model, infos_path, and memory_cell_path are pointing to the correct files and folders.
 
