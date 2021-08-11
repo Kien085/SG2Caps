@@ -16,6 +16,8 @@ Activate the environment with the following:
 conda activate myenv
 ```
 
+Install Java Runtime Environment for SPICE evaluation
+
 # Additional Dependency
 Pseudolabel is generated using Neural Motif through Scene Graph Benchmark in Pytorch in https://github.com/KaihuaTang/Scene-Graph-Benchmark.pytorch. 
 HOI is generated through VSGNet https://github.com/ASMIftekhar/VSGNet
