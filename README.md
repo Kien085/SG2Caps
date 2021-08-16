@@ -58,8 +58,7 @@ Download stanford-corenlp-3.6.0-models.jar and stanford-corenlp-3.6.0.jar and ad
 python train_mem.py --id id01 --caption_model lstm_mem4 --input_json data/cocobu2_appended.json --input_fc_dir data/cocobu_fc --input_att_dir data/cocobu_att --input_ssg_dir data/all_ISG --input_label_h5 data/cocobu2_label.h5 --sg_dict_path data/spice_sg_dict2.npz --batch_size 100 --accumulate_number 1 --learning_rate 5e-4 --learning_rate_decay_start 0 --learning_rate_decay_every 3 --scheduled_sampling_start 0 --checkpoint_path data/id01 --save_checkpoint_every 500 --val_images_use 5000 --max_epochs 150 --rnn_size 1000 --input_encoding_size 1000 --att_feat_size 2048 --att_hid_size 512 --self_critical_after 210 --train_split train --memory_size 10000 --memory_index c --step2_train_after 300 --step3_train_after 400 --use_rela 0 --gpu 0
 ```
 
-2.The Google Drive also contains pre-trained models that we used to get the numbers reported in the paper. SG2Caps is id09, SG2Caps Global is id14.
-(Need to find baseline, bbox, and global. Baseline and bbox are probably on the old server. Also find where RL is for SG2Caps) 
+2.The Google Drive also contains pre-trained models that we used to get the numbers reported in the paper. SG2Caps is id09. The checkpoint with only cross entropy loss is 090019, and the one with the reinforcement learning is 090115.
 
 3.The details of parameters:
 
