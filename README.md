@@ -1,5 +1,5 @@
 # SG2Caps
-SG2Caps: In Defense of Scene Graphs for Image Captioning, ICCV 2021
+SG2Caps: In Defense of Scene Graphs for Image Captioning, ICCV 2021 [Paper](https://arxiv.org/abs/2102.04990)
 
 # Acknowledgement
 This code is implemented based on Ruotian Luo's implementation of image captioning in https://github.com/ruotianluo/self-critical.pytorch.
